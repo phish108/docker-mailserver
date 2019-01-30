@@ -129,6 +129,7 @@ function register_functions() {
 	_register_setup_function "_setup_postfix_dhparam"
 	_register_setup_function "_setup_postfix_postscreen"
 	_register_setup_function "_setup_postfix_sizelimits"
+	_register_setup_function "_setup_crontab"
 
   if [ "$SPOOF_PROTECTION" = 1  ]; then
 		_register_setup_function "_setup_spoof_protection"
@@ -512,8 +513,8 @@ function _setup_dovecot() {
 		sed -i "s/#sieve_after =/sieve_after =/" /etc/dovecot/conf.d/90-sieve.conf
 		cp /tmp/docker-mailserver/after.dovecot.sieve /usr/lib/dovecot/sieve-global/
 		sievec /usr/lib/dovecot/sieve-global/after.dovecot.sieve
-	else 
-		sed -i "s/  sieve_after =/  #sieve_after =/" /etc/dovecot/conf.d/90-sieve.conf	
+	else
+		sed -i "s/  sieve_after =/  #sieve_after =/" /etc/dovecot/conf.d/90-sieve.conf
 	fi
 	chown docker:docker -R /usr/lib/dovecot/sieve*
 	chmod 550 -R /usr/lib/dovecot/sieve*
@@ -1304,6 +1305,12 @@ function _setup_environment() {
             echo "$var=${!var}" >> /etc/environment
         done
     fi
+}
+
+function _setup_crontab() {
+    notify 'task' 'include local crontab'
+
+    test -e /tmp/docker-mailserver/crontab && cp /tmp/docker-mailserver/crontab /etc/cron.d/usertasks
 }
 
 ##########################################################################
